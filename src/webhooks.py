@@ -353,6 +353,8 @@ while True:
     eew_code, eew_title, eew_text = get_eew()
 
     if eew_repNum_last != eew_repNum and eew_repNum != '' and eew_repNum_last != -1:
+      eew_repNum_last = eew_repNum
+      gotNewdata()
       upload(1, eew_title, eew_text)
       put_waiting()
 
@@ -363,6 +365,8 @@ while True:
     eqinfo_code, eqinfo_title, eqinfo_text = get_eqinfo()
 
     if eqinfo_id_last != eqinfo_id and eqinfo_id_last != -1:
+      eqinfo_id_last = eqinfo_id
+      gotNewdata()
       upload(2, eqinfo_title, eqinfo_text)
       put_waiting()
 

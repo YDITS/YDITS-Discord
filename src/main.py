@@ -33,8 +33,8 @@ bot = commands.Bot(command_prefix = '/', intents=intents)
 #dislash インスタンス生成
 slash = InteractionClient(bot)
 
-#api
-get_p2p_last = -1
+cooldownTime = 120
+cmdUseLast   = -1
 
 
 # -------------------- Functions -------------------- #
@@ -51,24 +51,61 @@ async def on_ready():
 
 
 # ---------- Commands ---------- #
+def chkCooldown():
+
+    global cmdUseLast
+
+    nowTime = time.time()
+
+    if not(nowTime - cmdUseLast <= cooldownTime):
+        cmdUseLast = nowTime
+        return True, None
+    else:
+        return False, int(cooldownTime - (nowTime - cmdUseLast))
+
+
+# ----- Too many ----- #
+async def tooMany(inter, time):
+    await inter.reply(
+        embed=discord.Embed(
+            title="エラーが発生しました",
+            color= 0xff4040,
+            description= "コマンドの実行頻度が多すぎます。\n"+
+                        f"約{time}秒間お待ちください。"
+        )
+        .set_footer(
+            text=f"エラーコード: 0x0201"
+        )
+    )
+    return
+
+
 # ----- info ----- #
 @slash.slash_command(
     name = 'info',
     description = '情報表示',
 )
 async def info(inter):
-    embed = discord.Embed(
-        title="YDITS",
-        color= 0x40ff40,
-        description=""
-    )
-    embed.add_field(
-        name=f'Ver {config.version}',
-        value='(c) 2022 よね/Yone\n'+
-            '不具合等の連絡は <@892376684093898772> までお願いいたします。'
-    )
-    await inter.reply(embed=embed)
-    return
+
+    isCooldown, time = chkCooldown()
+
+    if isCooldown:
+        embed = discord.Embed(
+            title="YDITS",
+            color= 0x40ff40,
+            description=""
+        )
+        embed.add_field(
+            name=f'Ver {config.version}',
+            value='(c) 2022 よね/Yone\n'+
+                '不具合等の連絡は <@892376684093898772> までお願いいたします。'
+        )
+        await inter.reply(embed=embed)
+        return
+
+    else:
+        await tooMany(inter, time)
+        return
 
 
 # ----- eqinfo ----- #
@@ -78,56 +115,57 @@ async def info(inter):
 )
 async def eqinfo(inter):
 
-    global get_p2p_last
+    isCooldown, time = chkCooldown()
 
-    nowTime = time.time()
+    print(isCooldown, time)
 
     #前回のコマンド実行との間隔が10秒以上の場合
-    if nowTime - get_p2p_last >= 10:
+    if isCooldown:
+
+        await inter.reply("取得中", delete_after=3.0)
         resCode, resData = await api.get_p2p()
-        get_p2p_last = nowTime
+
+        #エラーを定義
+        errors = {
+            0x0301: "地震情報の取得に失敗しました。\n",
+            0x0302: "JSONの解析に失敗しました。",
+            0x0303: "リクエストが多すぎます。",
+            0x0304: "HTTP NG が発生しました。",
+            0x0305: "JSONのデータアクセスで問題が発生しました。"
+        }
+
+        #正常時
+        if resCode == 0x0101:
+            
+            #embed生成
+            embed = discord.Embed(
+                title=resData[0],
+                color=resData[1],
+                description=resData[2]
+            )
+
+            await inter.reply(embed=embed)
+            return
+
+        #エラー時
+        else:
+
+            await inter.reply(
+                embed=discord.Embed(
+                    title="エラーが発生しました",
+                    color= 0xff4040,
+                    description=f"{errors[resCode]}```{resData}```"
+                )
+                .set_footer(
+                    text=f"エラーコード: {hex(resCode)}"
+                )
+            )
+            return
 
     #前回のコマンド実行との間隔が10秒未満の場合
     else:
-        resCode = 0x0200
-        resData = None
-
-    #エラーを定義
-    errors = {
-        0x0200:  "コマンドの実行頻度が多すぎます。\n"+
-                 "約10秒間お待ちください。",
-        0x0201:  "地震情報の取得に失敗しました。",
-        0x0202:  "JSONの解析に失敗しました。",
-        0x0203:  "リクエストが多すぎます。",
-        0x0204: f"HTTP {resData} が発生しました。",
-        0x0205:  "JSONのデータアクセスで問題が発生しました。"
-    }
-
-    #エラーの場合
-    if resCode in errors:
-        await inter.reply(
-            embed=discord.Embed(
-                title="エラーが発生しました",
-                color= 0xff4040,
-                description=f"{errors[resCode]}\n"
-            )
-            .set_footer(
-                text=f"エラーコード: {hex(resCode)}"
-            )
-        )
+        await tooMany(inter, time)
         return
-
-    #正常時
-    else:
-
-        #embed生成
-        embed = discord.Embed(
-            title=resData[0],
-            color=resData[1],
-            description=resData[2]
-        )
-
-        await inter.reply(embed=embed)
 
 
 # ---------- RUN ---------- #

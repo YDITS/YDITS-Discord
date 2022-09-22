@@ -26,7 +26,7 @@ async def get_p2p():
 
     #取得失敗時
     except Exception as e:
-        return 0x0201, e
+        return 0x0301, e
 
 
     # --- ステータス処理 --- #
@@ -39,15 +39,15 @@ async def get_p2p():
         
         #デシリアライズ失敗時
         except Exception:
-            return 0x0202, None
+            return 0x0302, None
 
     #429
     elif res.status_code == 429:
-        return 0x0203, None
+        return 0x0303, None
 
     #Other
     else:
-        return 0x0204, res.status_code
+        return 0x0304, res.status_code
 
 
     # --- アクセス --- #
@@ -160,7 +160,7 @@ async def get_p2p():
 
     #JSONアクセス失敗時
     except Exception as e:
-        return 0x0205, e
+        return 0x0305, e
 
     #生成
     data=f'発生日時：{eq_timeDay}日{eq_timeHour}時{eq_timeMinute}分頃\n'+\
