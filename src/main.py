@@ -15,11 +15,12 @@ from dislash import InteractionClient, Option, OptionType
 from data import config
 from module import api
 
+
 # -------------------- Init -------------------- #
 
 os.system('cls')
 print(
-    f"YDITS for Discord\n"+\
+    f"YDITS for Discord  {config.version}\n"+\
     f"(c) 2022 よね/Yone\n\n"+\
     f"discord.py  Ver {discord.__version__}\n\n"+\
     f"--------------------\n"
@@ -62,7 +63,7 @@ async def info(inter):
         description=""
     )
     embed.add_field(
-        name='Ver 0.0.0',
+        name=f'Ver {config.version}',
         value='(c) 2022 よね/Yone\n'+
             '不具合等の連絡は <@892376684093898772> までお願いいたします。'
     )

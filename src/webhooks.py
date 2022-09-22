@@ -1,407 +1,323 @@
 #
-# main.py / YDITS for Discord  ver 1.0.1 / yone1130
+# webhooks.py | YDITS for Discord
 #
+# (c) 2022 よね/Yone
+# licensed under the Apache License 2.0
+#
+
+import datetime
+import json
 import os
 from time import sleep
-import pprint
-import datetime
+
 import requests
-import json
 
-##### Functions #####
-def put_logo():
-  sleep(0.5)
-  print('                                ')
-  print(' ------------------------------ ')
-  print('                                ')
-  print('  YDITS for Discord  Ver 1.0.1  ')
-  print('                                ')
-  print(' ------------------------------ ')
-  print('                                ')
-  sleep(0.5)
+from data import config
 
-def selectMode():
-  print('Enter a number to select mode\n')
-  print('1: "P2P earthquake information" only')
-  print('2: "P2P earthquake information" and "EEW from NIED"')
 
-  while True:
-    print('>', end='')
-    val = input()
+# ---------- Main ---------- #
 
-    if val == '1':
-      return 1
-      break
+os.system('cls')
+print(
+    f"webhooks | YDITS for Discord  {config.version}\n"+\
+    f"(c) 2022 よね/Yone\n\n"+\
+    f"--------------------\n"
+)
 
-    if val == '2':
-      return 2
-      break
-
-    else: print('There is not that number.')
-
-def getTime():
+# ---------- Functions ---------- #
+def get_time():
   global DT
   DT = datetime.datetime.now()
 
-class Point:
-  def __init__(self, scale, name):
-      self.scale = scale
-      self.name  = name
 
-def getData(firstFlag, getType):
-  getTime()
+def make_getNiedDT():
 
-  if firstFlag == True:
-    global latestState_NIED
-    global latestState_p2p
-    latestState_NIED = 1
-    latestState_p2p  = 1
-    print(' <Connect>')
+  if DT.month < 10:
+    eew_getTimeMonth = '0' + str(DT.month)
+  else:
+    eew_getTimeMonth = str(DT.month)
+  if DT.day < 10:
+    eew_getTimeDay = '0' + str(DT.day)
+  else:
+    eew_getTimeDay = str(DT.day)
+  if DT.hour < 10:
+    eew_getTimeHour = '0' + str(DT.hour)
+  else:
+    eew_getTimeHour = str(DT.hour)
+  if DT.minute < 10:
+    eew_getTimeMinute = '0' + str(DT.minute)
+  else:
+    eew_getTimeMinute = str(DT.minute)
+  if DT.second < 10:
+    eew_getTimeSecond = '0' + str(DT.second)
+  else:
+    eew_getTimeSecond = str(DT.second-1)
 
-  ##### NIED EEW
-  global _report_num
-  _report_num = ''
-  global report_num
-  report_num = ''
+  return str(DT.year) + eew_getTimeMonth + eew_getTimeDay + eew_getTimeHour + eew_getTimeMinute + eew_getTimeSecond
 
-  if getType == 0 or getType == 1:
-    if firstFlag == True: print('NIED      ：', end='')
 
-    global timeMonth
-    if DT.month < 10: timeMonth = '0' + str(DT.month)
-    else: timeMonth = str(DT.month)
-    global timeDay
-    if DT.day < 10: timeDay = '0' + str(DT.day)
-    else: timeDay = str(DT.day)
-    global timeHour
-    if DT.hour < 10: timeHour = '0' + str(DT.hour)
-    else: timeHour = str(DT.hour)
-    global timeMinute
-    if DT.minute < 10: timeMinute = '0' + str(DT.minute)
-    else: timeMinute = str(DT.minute)
-    global timeSecond
-    if DT.second < 10: timeSecond = '0' + str(DT.second)
-    else: timeSecond = str(DT.second)
+def get_eew():
 
-    NIED_DT = str(DT.year) + timeMonth + timeDay + timeHour + timeMinute + timeSecond
+  global eew_repNum
 
-    url = f'https://www.lmoni.bosai.go.jp/monitor/webservice/hypo/eew/{NIED_DT}.json'
+  #makeUrl
+  getNiedDT = make_getNiedDT()
+  url = f'https://www.lmoni.bosai.go.jp/monitor/webservice/hypo/eew/{getNiedDT}.json'
 
-    global res_NIED
+  #Get
+  try:
+    res = requests.get(url, timeout=3.0)   ### get
+  except Exception:
+    print("Error1")
+    return 0x0201, None, None
+
+  #satatus
+  if res.status_code == 200:
     try:
-      res_NIED = requests.get(url, timeout=1.0)   ### get
-      if latestState_NIED != 1:
-        print('Connection restored at ' + str(DT))
-        latestState_NIED = 1
+      data = json.loads(res.text)
     except Exception:
-      if latestState_NIED != 0:
-        print('Connection error at ' + str(DT))
-        latestState_NIED = 0
-
-    global data_NIED
-    if res_NIED.status_code == 200:
-      if firstFlag == True: print('OK')
-      try:
-        data_NIED = json.loads(res_NIED.text)
-      except Exception:
-        pass
-
-    elif res_NIED.status_code == 502:
       pass
 
-    elif res_NIED.status_code == 404:
-      print(f'Error HTTP {res_NIED.status_code} ：The specified server cannot be found.')
+  elif res.status_code == 502:
+    pass
 
-    elif res_NIED.status_code == 429:
-      print(f'Error HTTP {res_NIED.status_code} :Too many requests.')
+  elif res.status_code == 404:
+    print(f'HTTP 404: The specified server cannot be found.')
 
-    else:
-      print(f'Error HTTP {res_NIED.status_code} has occurred.')
+  elif res.status_code == 429:
+    print(f'HTTP 429: Too many requests.')
 
-    #Message
-    global message
-    message = data_NIED['result']['message']
+  else:
+    print(f'HTTP {res.status_code} has occurred.')
 
-    #Origin time
-    global OriginTime
-    OriginTime = data_NIED['origin_time']
+  #time
+  eew_time = data['origin_time']
 
-    global eewYear
-    eewYear = OriginTime[0:4]
-    global eewMonth
-    eewMonth = OriginTime[4:6]
-    global eewDay
-    eewDay = OriginTime[6:8]
-    global eewHour
-    eewHour = OriginTime[8:10]
-    global eewMinute
-    eewMinute = OriginTime[10:12]
-    global eewSecond
-    eewSecond = OriginTime[12:14]
+  eew_timeYear = eew_time[0:4]
+  eew_timeMonth = eew_time[4:6]
+  eew_timeDay = eew_time[6:8]
+  eew_timeHour = eew_time[8:10]
+  eew_timeMinute = eew_time[10:12]
+  eew_timeSecond = eew_time[12:14]
 
-    #Report number
-    _report_num = data_NIED['report_num']
+  #Report number
+  eew_repNum = data['report_num']
 
-    if _report_num != '':
-      report_num = '第' + _report_num + '報'
-    else:
-      report_num = ''
+  if eew_repNum != '':
+    eew_repNum_put = f"第{eew_repNum}報"
+  else:
+    eew_repNum_put = ""
 
-    #Alert flag
-    global alertflg
-    if _report_num != '':
-      alertflg = data_NIED['alertflg']
-    else:
-      alertflg = ''
+  #Alert flag
+  if eew_repNum != '':
+    eew_alertflg = data['alertflg']
+  else:
+    eew_alertflg = ''
 
-    #Is training
-    global is_training
-    is_training = data_NIED['is_training']
+  #Is training
+  eew_isTraining = data['is_training']
 
-    #Is final
-    global is_final
-    is_final = data_NIED['is_final']
+  #Is final
+  eew_isFinal = data['is_final']
 
-    if is_final:
-      report_num = '最終報'
+  if eew_isFinal:
+    eew_repNum_put = "最終報"
 
-    #Region name
-    global region_name
-    region_name = data_NIED['region_name']
+  #Region name
+  eew_hypoName = data['region_name']
 
-    if region_name == '':
-      region_name = '不明'
+  if eew_hypoName == '':
+    eew_hypoName = "不明"
 
-    #Calcintensity
-    global calcintensity
-    calcintensity = data_NIED['calcintensity']
+  #Calcintensity
+  eew_maxInt = data['calcintensity']
 
-    if calcintensity == '':
-      calcintensity = '不明'
+  if eew_maxInt == '':
+    eew_maxInt = "不明"
 
-    #Magunitude
-    global magunitude_NIED
-    magunitude_NIED = data_NIED['magunitude']
+  #Magunitude
+  eew_magunitude = data['magunitude']
 
-    if magunitude_NIED == '':
-      magunitude_NIED = '不明'
-    else:
-      magunitude_NIED = 'M' + magunitude_NIED
+  if eew_magunitude == '':
+    eew_magunitude = "不明"
+  else:
+    eew_magunitude = f"M{eew_magunitude}"
 
-    #Depth
-    global depth_NIED
-    depth_NIED = data_NIED['depth']
+  #Depth
+  eew_depth = data['depth']
 
-    if depth_NIED == '':
-      depth_NIED = '不明'
-    else:
-      depth_NIED = '約'+ depth_NIED
+  if eew_depth == '':
+    eew_depth = "不明"
+  else:
+    eew_depth = f"約{eew_depth}"
 
-    #Is cancel
-    global is_cancel
-    is_cancel = data_NIED['is_cancel']
+  title = f'緊急地震速報 ({eew_alertflg})  {eew_repNum_put}'
+  text = f'{eew_timeDay}日{eew_timeHour}時{eew_timeMinute}分頃\n'+\
+        f'{eew_hypoName}で地震が発生しました\n'+\
+        f'予想最大震度：{eew_maxInt}\n'+\
+        f'　予想規模　：{eew_magunitude}\n'+\
+        f'　予想深さ　：{eew_depth}\n\n'+\
+          '今後の情報に注意してください'
+  return 0x0101, title ,text
 
-    if is_cancel:
-      alertflg = '取消'
 
-  ##### P2P Infomation
-  global point
-  point = {}
+def get_eqinfo():
 
-  if getType == 0 or getType == 2:
-    if firstFlag == True: print('P2P Quakes：', end='')
+  global eqinfo_id
 
-    url = 'https://api.p2pquake.net/v2/history/'
+  url = 'https://api.p2pquake.net/v2/history/'
 
-    params = {
-      'zipcode': '',
-      'codes': '551',
-      'limit': '1'
-    }
+  params = {
+    'zipcode': '',
+    'codes': '551',
+    'limit': '1'
+  }
 
-    global res_p2p
+  try:
+    res = requests.get(url, params=params, timeout=3.0)   ### get
+  except Exception:
+    print("Error2")
+    return 0x0202, None, None
+
+  if res.status_code == 200:
     try:
-      res_p2p = requests.get(url, params=params, timeout=1.0)   ### get
-      if latestState_p2p != 1:
-        print('Connection restored at ' + str(DT))
-        latestState_p2p = 1
+      data = json.loads(res.text)
     except Exception:
-      if latestState_p2p != 0:
-        print('Connection error at ' + str(DT))
-        latestState_p2p = 0
+      pass
+  
+  elif res.status_code == 404:
+    print("HTTP 404: The specified server cannot be found.")
+  
+  elif res.status_code == 429:
+    print("HTTP 429: Too many requests.")
+  
+  else:
+    print(f"Error HTTP {res.status_code} has occurred.")
 
-    global data_p2p
-    if res_p2p.status_code == 200:
-      if firstFlag == True: print('OK\n')
-      try:
-        data_p2p = json.loads(res_p2p.text)
-      except Exception:
-        pass
-    
-    elif res_p2p.status_code == 404:
-      print(f'Error HTTP {res_p2p.status_code} ：The specified server cannot be found.')
-    
-    elif res_p2p.status_code == 429:
-      print(f'Error HTTP {res_p2p.status_code} :Too many requests.')
-    
-    else:
-      print(f'Error HTTP {res_p2p.status_code} has occurred.')
+  #id
+  eqinfo_id = data[0]['id']
 
-    #id
-    global id
-    id = data_p2p[0]['id']
+  #time
+  eqinfo_time = data[0]['earthquake']['time']
 
-    #Time of Occurrence
-    global jmaDatetime
-    jmaDatetime = data_p2p[0]['earthquake']['time']
+  #type
+  eqinfo_type = data[0]['issue']['type']
 
-    #Type
-    global _jmaType
-    _jmaType = data_p2p[0]['issue']['type']
+  eqinfo_types = {
+      'ScalePrompt': "震度速報",
+      'Destination': "震源情報",
+      'ScaleAndDestination': "震源・震度情報",
+      'DetailScale': "各地の震度情報",
+      'Foreign': "遠地地震情報",
+      'Other': "地震情報"
+  }
 
-    global jmaType
-    jmaTypes = {
-      'ScalePrompt': '震度速報',
-      'Destination': '震源情報',
-      'ScaleAndDestination': '震源・震度情報',
-      'DetailScale': '地震情報',
-      'Other': '地震情報'
-    }
+  if eqinfo_type in eqinfo_types:
+    eqinfo_type = eqinfo_types[eqinfo_type]
 
-    if _jmaType in jmaTypes:
-      jmaType = jmaTypes[_jmaType]
+  #hypocenter
+  eqinfo_hypo = data[0]['earthquake']['hypocenter']['name']
 
-    #Hypocenter
-    global hypocenter
-    hypocenter = data_p2p[0]['earthquake']['hypocenter']['name']
+  if eqinfo_hypo == '':
+    eqinfo_hypo = '調査中'
 
-    if hypocenter == '':
-      hypocenter = '調査中'
+  #maxScale
+  eqinfo_maxScale = data[0]['earthquake']['maxScale']
 
-    #Max scale
-    global _maxScale
-    _maxScale = data_p2p[0]['earthquake']['maxScale']
+  eqinfo_Scales = {
+    -1: '調査中',
+    10: '1',
+    20: '2',
+    30: '3',
+    40: '4',
+    45: '5弱',
+    50: '5強',
+    55: '6弱',
+    60: '6強',
+    70:'7'
+  }
 
-    global maxScale
-    Scales = {-1: '調査中', 10: '1', 20: '2', 30: '3', 40: '4', 45: '5弱', 50: '5強', 55: '6弱', 60: '6強', 70: '7'}
-    if _maxScale in Scales:
-      maxScale = Scales[_maxScale]
+  if eqinfo_maxScale in eqinfo_Scales:
+    eqinfo_maxScale = eqinfo_Scales[eqinfo_maxScale]
 
-    #Magnitude
-    global magnitude_p2p
-    magnitude_p2p = data_p2p[0]['earthquake']['hypocenter']['magnitude']
+  #magnitude
+  eqinfo_magnitude = data[0]['earthquake']['hypocenter']['magnitude']
 
-    if magnitude_p2p == -1:
-      magnitude_p2p = '調査中'
-    else:
-      magnitude_p2p = 'M' + str(magnitude_p2p)
+  if eqinfo_magnitude == -1:
+    eqinfo_magnitude = '調査中'
+  else:
+    eqinfo_magnitude = f"M{str(eqinfo_magnitude)}"
 
-    #Depth
-    global depth_p2p
-    depth_p2p = data_p2p[0]['earthquake']['hypocenter']['depth']
+  #depth
+  eqinfo_depth = data[0]['earthquake']['hypocenter']['depth']
 
-    if depth_p2p == -1:
-      depth_p2p = '調査中'
-    elif depth_p2p == 0:
-      depth_p2p = 'ごく浅い'
-    else:
-      depth_p2p = '約' + str(depth_p2p) + 'km'
+  if eqinfo_depth == -1:
+    eqinfo_depth = '調査中'
+  elif eqinfo_depth == 0:
+    eqinfo_depth = 'ごく浅い'
+  else:
+    eqinfo_depth = f"約{str(eqinfo_depth)}km"
 
-    #Tsunami
-    global _domesticTsunami
-    _domesticTsunami = data_p2p[0]['earthquake']['domesticTsunami']
+  #tsunami
+  eqinfo_tsunami = data[0]['earthquake']['domesticTsunami']
 
-    global domesticTsunami
-    tsunamiLevels = {
-      'None': 'この地震による津波の心配はありません。',
-      'Unknown': '津波の影響は不明です。',
-      'Checking': '津波の影響を現在調査中です。',
-      'NonEffective': '若干の海面変動が予想されますが、被害の心配はありません。',
-      'Watch': 'この地震で津波注意報が発表されています。',
-      'Warning': 'この地震で津波警報等（大津波警報・津波警報あるいは津波注意報）が発表されています。'
-    }
+  eqinfo_tsunamiLevels = {
+    'None': 'この地震による津波の心配はありません。',
+    'Unknown': '津波の影響は不明です。',
+    'Checking': '津波の影響を現在調査中です。',
+    'NonEffective': '若干の海面変動が予想されますが、被害の心配はありません。',
+    'Watch': 'この地震で津波注意報が発表されています。',
+    'Warning': 'この地震で津波警報等（大津波警報・津波警報あるいは津波注意報）が発表されています。'
+  }
 
-    if _domesticTsunami in tsunamiLevels:
-      domesticTsunami = tsunamiLevels[_domesticTsunami]
+  if eqinfo_tsunami in eqinfo_tsunamiLevels:
+    eqinfo_tsunami = eqinfo_tsunamiLevels[eqinfo_tsunami]
 
-    #Quake report
-    global quake
-    if _maxScale < 30:
-      quake = ''
-    if _maxScale == 30: 
-      quake = 'この地震による揺れを感じました。\n\n'
-    if _maxScale == 40:
-      quake = 'この地震によるやや強い揺れを感じました。\n\n'
-    if _maxScale >= 50:
-      quake = 'この地震による非常に強い揺れを感じました。\n\n'
+  eqinfo_timeYear   = eqinfo_time[0:4]
+  eqinfo_timeMonth  = eqinfo_time[5:7]
+  eqinfo_timeDay    = eqinfo_time[8:10]
+  eqinfo_timeHour   = eqinfo_time[11:13]
+  eqinfo_timeMinute = eqinfo_time[14:16]
+  eqinfo_timeSecond = eqinfo_time[17:19]
 
-    global jmaYear
-    jmaYear = jmaDatetime[0:4]
-    global jmaMonth
-    jmaMonth = jmaDatetime[5:7]
-    global jmaDay
-    jmaDay = jmaDatetime[8:10]
-    global jmaHour
-    jmaHour = jmaDatetime[11:13]
-    global jmaMinute
-    jmaMinute = jmaDatetime[14:16]
-    global jmaSecond
-    jmaSecond = jmaDatetime[17:19]
+  title = f'{eqinfo_type}'
+  text = f'{eqinfo_timeDay}日{eqinfo_timeHour}時{eqinfo_timeMinute}分頃\n'+\
+         f'{eqinfo_hypo}を震源とする、最大震度{eqinfo_maxScale}の地震がありました。\n'+\
+         f'地震の規模は{eqinfo_magnitude}、震源の深さは{eqinfo_depth}と推定されます。\n'+\
+         f'{eqinfo_tsunami}'
+  return 0x0101, title ,text
 
-    # points = data_p2p[0]['points']
-    # for temp[0] in range(len(points)):
-    #   temp[1] = int(points[temp[0]]['scale'])
-    #   temp[2] = points[temp[0]]['addr']
-    #   point[len(point)] = Point(temp[1], temp[2])
 
 def put_waiting():
-  if Mode == 1: print('Waiting for earthquake information.\n')
-  if Mode == 2: print('Waiting for EEW and earthquake information.\n')
+  print('>Waiting for EEW and earthquake information.\n')
 
-def put_data():
-  pprint.pprint(data_p2p)
 
 def gotNewdata(Type):
-  print('Earthquake information was retrieved.\n')
+  print('>Earthquake information was retrieved.')
   print('At time：' + str(DT) + '\n')
-
-  if Type == 1:
-    return _report_num
-  elif Type == 2:
-    return id
-
-def uploadTwitter(uploadType):
+  print('------------------------------------------------------------------------------------------\n')
 
 
-  if uploadType == 1:
+def upload(type, title, text):
+
+  if type == 1:
     url = ''
     params = {
         'embeds': [
           {
-            'title': f'緊急地震速報 ({alertflg})  {report_num}',
-            'description': 
-              f'{eewDay}日{eewHour}時{eewMinute}分頃\n'+
-              f'{region_name}で地震が発生しました\n'+
-              f'予想最大震度：{calcintensity}\n'+
-              f'　予想規模　：{magunitude_NIED}\n'+
-              f'　予想深さ　：{depth_NIED}\n\n'+
-              f'今後の情報に注意してください'
+            'title': title,
+            'description': text
           }
         ]
-
     }
 
-  if uploadType == 2:
+  if type == 2:
     url = ''
     params = {
       'embeds': [
         {
-          'title': f'{jmaType}',
-          'description': 
-            f'{jmaDay}日{jmaHour}時{jmaMinute}分頃\n'+
-            f'{hypocenter}を震源とする、最大震度{maxScale}の地震がありました。\n'+
-            f'地震の規模は{magnitude_p2p}、震源の深さは{depth_p2p}と推定されます。\n'+
-            f'{domesticTsunami}'
+          'title': title,
+          'description': text
         }
       ]
     }
@@ -415,62 +331,43 @@ def uploadTwitter(uploadType):
   else:
     print(f'Could not be distributed. Error Code：{res.status_code}\n')
 
-### debug ###
-def debug():
-  print('------------------------------------------------------------------------------------------')
-  print('')
 
-###### Setup #####
+# ---------- Init ---------- #
 
-os.system('cls')
-put_logo()
+eew_repNum_last = -1
+eqinfo_id_last  = -1
 
-Mode = selectMode()
+cnt_getEew    = 0
+cnt_getEqinfo = 0
 
-os.system('cls')
-put_logo()
-
-temp = {}
-
-if   Mode == 1: getType = 2
-elif Mode == 2: getType = 0
-getData(1, getType)
-
-latestId = id
-latest_report_num = _report_num
-
-cnt_NIED = 0; cnt_p2p = 0
-
-#put_data()
-debug()
 put_waiting()
 
-##### Main #####
+# ---------- Mainloop ---------- #
 while True:
-  sleep(1)
-  cnt_NIED += 1
-  cnt_p2p  += 1
 
-  if   Mode == 2:
-    if cnt_NIED >= 2:
-      cnt_NIED = 0
-      getData(0, 1)
+  get_time()
 
-  if cnt_p2p >= 12:
-    cnt_p2p = 0
-    getData(0, 2)
+  if cnt_getEew >= 1:
 
-  if Mode == 2:
-    if latest_report_num != _report_num and _report_num != '':
-      getTime()
-      latest_report_num = gotNewdata(1)
-      debug()
-      uploadTwitter(1)
+    cnt_getEew = 0
+    eew_code, eew_title, eew_text = get_eew()
+
+    if eew_repNum_last != eew_repNum and eew_repNum != '' and eew_repNum_last != -1:
+      upload(1, eew_title, eew_text)
       put_waiting()
 
-  if latestId != id:
-    getTime()
-    latestId = gotNewdata(2)
-    debug()
-    uploadTwitter(2)
-    put_waiting()
+
+  if cnt_getEqinfo >= 10:
+
+    cnt_getEqinfo = 0
+    eqinfo_code, eqinfo_title, eqinfo_text = get_eqinfo()
+
+    if eqinfo_id_last != eqinfo_id and eqinfo_id_last != -1:
+      upload(2, eqinfo_title, eqinfo_text)
+      put_waiting()
+
+  #Update
+  cnt_getEew += 1
+  cnt_getEqinfo  += 1
+
+  sleep(1)

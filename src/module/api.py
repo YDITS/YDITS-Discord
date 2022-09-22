@@ -23,15 +23,21 @@ async def get_p2p():
     #取得
     try:
         res = requests.get(url, params=params, timeout=3.0)
+
+    #取得失敗時
     except Exception as e:
         return 0x0201, e
+
 
     # --- ステータス処理 --- #
 
     #200
     if res.status_code == 200:
+        #デシリアライズ
         try:
             data = json.loads(res.text)
+        
+        #デシリアライズ失敗時
         except Exception:
             return 0x0202, None
 
@@ -43,11 +49,19 @@ async def get_p2p():
     else:
         return 0x0204, res.status_code
 
+
     # --- アクセス --- #
 
     try:
         #time
         eq_time = data[0]['issue']['time']
+
+        eq_timeYear   = eq_time[0:4]
+        eq_timeMonth  = eq_time[5:7]
+        eq_timeDay    = eq_time[8:10]
+        eq_timeHour   = eq_time[11:13]
+        eq_timeMinute = eq_time[14:16]
+        eq_timeSecond = eq_time[17:19]
 
         #type
         eq_type = data[0]['issue']['type']
@@ -125,13 +139,7 @@ async def get_p2p():
         if eq_tsunami in tsunamiLevels:
             eq_tsunami = tsunamiLevels[eq_tsunami]
 
-        eq_timeYear   = eq_time[0:4]
-        eq_timeMonth  = eq_time[5:7]
-        eq_timeDay    = eq_time[8:10]
-        eq_timeHour   = eq_time[11:13]
-        eq_timeMinute = eq_time[14:16]
-        eq_timeSecond = eq_time[17:19]
-
+        #colors
         colors = {
             '1': 0xc0c0c0,
             '2': 0x2020c0,
@@ -148,10 +156,13 @@ async def get_p2p():
             color = colors[eq_maxScale]
         else:
             color = 0x7f7fc0
-    
+
+
+    #JSONアクセス失敗時
     except Exception as e:
         return 0x0205, e
 
+    #生成
     data=f'発生日時：{eq_timeDay}日{eq_timeHour}時{eq_timeMinute}分頃\n'+\
          f'　震源　：{eq_hypo}\n'+\
          f'最大震度：{eq_maxScale}\n'+\
