@@ -33,7 +33,7 @@ bot = commands.Bot(command_prefix = '/', intents=intents)
 #dislash インスタンス生成
 slash = InteractionClient(bot)
 
-cooldownTime = 120
+cooldownTime = 10
 cmdUseLast   = -1
 
 
