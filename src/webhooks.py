@@ -158,8 +158,21 @@ def get_eew():
         f'　予想規模　：{eew_magunitude}\n'+\
         f'　予想深さ　：{eew_depth}\n\n'+\
           '今後の情報に注意してください'
-  return 0x0101, title ,text
 
+  eew_postInts = [
+    '3',
+    '4',
+    '5弱',
+    '5強',
+    '6弱',
+    '6強',
+    '7'
+  ]
+
+  if eew_maxInt in eew_postInts:
+    return 0x0102, title ,text
+  else:
+    return 0x0101, None, None
 
 def get_eqinfo():
 
@@ -238,7 +251,7 @@ def get_eqinfo():
   }
 
   if eqinfo_maxScale in eqinfo_Scales:
-    eqinfo_maxScale = eqinfo_Scales[eqinfo_maxScale]
+    eqinfo_maxScale_put = eqinfo_Scales[eqinfo_maxScale]
 
   #magnitude
   eqinfo_magnitude = data[0]['earthquake']['hypocenter']['magnitude']
@@ -282,17 +295,21 @@ def get_eqinfo():
 
   title = f'{eqinfo_type}'
   text = f'{eqinfo_timeDay}日{eqinfo_timeHour}時{eqinfo_timeMinute}分頃\n'+\
-         f'{eqinfo_hypo}を震源とする、最大震度{eqinfo_maxScale}の地震がありました。\n'+\
+         f'{eqinfo_hypo}を震源とする、最大震度{eqinfo_maxScale_put}の地震がありました。\n'+\
          f'地震の規模は{eqinfo_magnitude}、震源の深さは{eqinfo_depth}と推定されます。\n'+\
          f'{eqinfo_tsunami}'
-  return 0x0101, title ,text
+
+  if eqinfo_maxScale >= 30:
+    return 0x0102, title ,text
+  else:
+    return 0x0101, None, None
 
 
 def put_waiting():
   print('>Waiting for EEW and earthquake information.\n')
 
 
-def gotNewdata(Type):
+def gotNewdata():
   print('>Earthquake information was retrieved.')
   print('At time：' + str(DT) + '\n')
   print('------------------------------------------------------------------------------------------\n')
@@ -353,7 +370,7 @@ while True:
     cnt_getEew = 0
     eew_code, eew_title, eew_text = get_eew()
 
-    if eew_repNum_last != eew_repNum and eew_repNum != '':
+    if eew_repNum_last != eew_repNum and eew_repNum != '' and eew_code == 0x0102:
       eew_repNum_last = eew_repNum
       gotNewdata()
       upload(1, eew_title, eew_text)
@@ -365,14 +382,12 @@ while True:
     cnt_getEqinfo = 0
     eqinfo_code, eqinfo_title, eqinfo_text = get_eqinfo()
 
-    if eqinfo_id_last != eqinfo_id:
-      eqinfo_id_last = eqinfo_id
-      if  eqinfo_id_last == -1:
-        pass
-      else:
+    if eqinfo_id_last != eqinfo_id and eqinfo_code == 0x0102:
+      if eqinfo_id_last != -1:
         gotNewdata()
         upload(2, eqinfo_title, eqinfo_text)
         put_waiting()
+      eqinfo_id_last = eqinfo_id
 
   #Update
   cnt_getEew += 1
