@@ -12,11 +12,11 @@ from time import sleep
 
 import requests
 
+#Config
 from data import config
 
 
 # ---------- Main ---------- #
-
 os.system('cls')
 print(
     f"webhooks | YDITS for Discord  {config.version}\n"+\

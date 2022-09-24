@@ -8,16 +8,17 @@
 import os
 import time
 
+#Discord Bot
 import discord
 from discord.ext import commands
 from dislash import InteractionClient, Option, OptionType
 
+#Config
 from data import config
 from module import api
 
 
 # -------------------- Init -------------------- #
-
 os.system('cls')
 print(
     f"YDITS for Discord  {config.version}\n"+\
@@ -26,27 +27,25 @@ print(
     f"--------------------\n"
 )
 
-#discord インスタンス生成
+
+# ---------- Instance ---------- #
+#discord
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix = '/', intents=intents)
 
-#dislash インスタンス生成
+#dislash
 slash = InteractionClient(bot)
 
+
+# ---------- Init val---------- #
 cooldownTime = 10
 cmdUseLast   = -1
 
 
 # -------------------- Functions -------------------- #
-
-# ------------------------------------------------- #
-# -------------------- Discord -------------------- #
-# ------------------------------------------------- #
-
 # ---------- On ready ---------- #
 @bot.event
 async def on_ready():
-    # await bot.change_presence(activity=discord.Game(name=""))
     print(">Ready.  Waiting for any command and message\n")
 
 
