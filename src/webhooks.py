@@ -305,7 +305,7 @@ def get_tsunamiInfo():
         res = requests.get(url, params=params, timeout=3.0)   ### get
     except Exception as e:
         print(">Error get p2pquake Tsunami info.")
-        return 0x0202, e
+        return 0x0202, None, None
 
     #satatus
     if res.status_code == 200:
