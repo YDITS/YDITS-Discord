@@ -10,7 +10,7 @@ import requests
 
 
 # ---------- Functions ---------- #
-async def get_p2p():
+async def get_eqinfo():
 
     url = 'https://api.p2pquake.net/v2/history/'
 
@@ -171,3 +171,106 @@ async def get_p2p():
          f'{eq_tsunami}'
 
     return 0x0101, [eq_type, color, data]
+
+
+async def get_tnmInfo():
+
+    url = 'https://api.p2pquake.net/v2/history/'
+
+    params = {
+      'zipcode': '',
+      'codes': '552',
+      'limit': '1'
+    }
+
+    #取得
+    try:
+        res = requests.get(url, params=params, timeout=3.0)
+
+    #取得失敗時
+    except Exception as e:
+        return 0x0301, e
+
+
+    # --- ステータス処理 --- #
+
+    #200
+    if res.status_code == 200:
+        #デシリアライズ
+        try:
+            data = json.loads(res.text)
+        
+        #デシリアライズ失敗時
+        except Exception:
+            return 0x0302, None
+
+    #429
+    elif res.status_code == 429:
+        return 0x0303, None
+
+    #Other
+    else:
+        return 0x0304, res.status_code
+
+    # --- アクセス --- #
+
+    try:
+        #time
+        tnmInfo_time = data[0]['time']
+
+        #id
+        tnmInfo_id = data[0]['id']
+
+        #cancelled
+        tnmInfo_cancelled = data[0]['cancelled']
+
+        #areas
+        tnmInfo_areas = data[0]['areas']
+
+        tnmInfo_timeYear   = tnmInfo_time[0:4]
+        tnmInfo_timeMonth  = tnmInfo_time[5:7]
+        tnmInfo_timeDay    = tnmInfo_time[8:10]
+        tnmInfo_timeHour   = tnmInfo_time[11:13]
+        tnmInfo_timeMinute = tnmInfo_time[14:16]
+        tnmInfo_timeSecond = tnmInfo_time[17:19]
+
+        color = 0x7f7fc0
+
+    #JSONアクセス失敗時
+    except Exception as e:
+        return 0x0305, e
+
+    #生成
+    if data[0]['cancelled'] == False:
+
+        #content
+        title =  "津波情報"
+        data = f"発表日時: {tnmInfo_timeDay}日{tnmInfo_timeHour}時{tnmInfo_timeMinute}分\n\n"+\
+                "海岸から離れてください\n"
+
+        #list
+        lastGrade = ""
+
+        for area in tnmInfo_areas:
+
+            name  = area['name']
+            grade = area['grade']
+
+            if grade != lastGrade:
+                if grade == "MajorWarning":
+                    data += "\n[大津波警報]\n"
+                elif grade == "Warning":
+                    data += "\n[津波警報]\n"
+                elif grade == "Watch":
+                    data += "\n[津波注意報]\n"
+                else:
+                    data += "\n[不明]\n"
+                lastGrade = grade
+
+            data += f"{name}\n"
+
+    elif data[0]['cancelled'] == True:
+        title = "津波情報"
+        data = "津波警報等は発表されていません。"
+
+    return 0x0101, [title, color, data]

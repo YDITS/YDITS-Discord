@@ -122,11 +122,71 @@ async def eqinfo(inter):
     if isCooldown:
 
         await inter.reply("取得中", delete_after=3.0)
-        resCode, resData = await api.get_p2p()
+        resCode, resData = await api.get_eqinfo()
 
         #エラーを定義
         errors = {
             0x0301: "地震情報の取得に失敗しました。\n",
+            0x0302: "JSONの解析に失敗しました。",
+            0x0303: "リクエストが多すぎます。",
+            0x0304: "HTTP NG が発生しました。",
+            0x0305: "JSONのデータアクセスで問題が発生しました。"
+        }
+
+        #正常時
+        if resCode == 0x0101:
+            
+            #embed生成
+            embed = discord.Embed(
+                title=resData[0],
+                color=resData[1],
+                description=resData[2]
+            )
+
+            await inter.reply(embed=embed)
+            return
+
+        #エラー時
+        else:
+
+            await inter.reply(
+                embed=discord.Embed(
+                    title="エラーが発生しました",
+                    color= 0xff4040,
+                    description=f"{errors[resCode]}```{resData}```"
+                )
+                .set_footer(
+                    text=f"エラーコード: {hex(resCode)}"
+                )
+            )
+            return
+
+    #前回のコマンド実行との間隔が10秒未満の場合
+    else:
+        await tooMany(inter, time)
+        return
+
+
+# ----- tnmInfo ----- #
+@slash.slash_command(
+    name = 'tsunami-info',
+    description = '津波情報を表示',
+)
+async def tnmInfo(inter):
+
+    isCooldown, time = chkCooldown()
+
+    print(isCooldown, time)
+
+    #前回のコマンド実行との間隔が10秒以上の場合
+    if isCooldown:
+
+        await inter.reply("取得中", delete_after=3.0)
+        resCode, resData = await api.get_tnmInfo()
+
+        #エラーを定義
+        errors = {
+            0x0301: "津波情報の取得に失敗しました。\n",
             0x0302: "JSONの解析に失敗しました。",
             0x0303: "リクエストが多すぎます。",
             0x0304: "HTTP NG が発生しました。",

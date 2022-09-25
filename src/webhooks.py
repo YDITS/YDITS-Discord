@@ -7,6 +7,7 @@
 
 import datetime
 import json
+from operator import eq
 import os
 from time import sleep
 
@@ -289,6 +290,100 @@ def get_eqinfo():
   return 0x0101, title ,text
 
 
+def get_tsunamiInfo():
+
+    global tnmInfo_id
+
+    url = "https://api.p2pquake.net/v2/history/"
+
+    params = {
+        'zipcode': '',
+        'codes': '552',
+        'limit': '1'
+    }
+
+    try:
+        res = requests.get(url, params=params, timeout=3.0)   ### get
+    except Exception as e:
+        print(">Error get p2pquake Tsunami info.")
+        return 0x0202, e
+
+    #satatus
+    if res.status_code == 200:
+        try:
+            data = json.loads(res.text)
+        except Exception:
+            pass
+
+    elif res.status_code == 502:
+        pass
+
+    elif res.status_code == 404:
+        print(f'HTTP 404: The specified server cannot be found.')
+
+    elif res.status_code == 429:
+        print(f'HTTP 429: Too many requests.')
+
+    else:
+        print(f'HTTP {res.status_code} has occurred.')
+
+    # ----- data ----- #
+
+    #time
+    tnmInfo_time = data[0]['time']
+
+    #id
+    tnmInfo_id = data[0]['id']
+
+    #cancelled
+    tnmInfo_cancelled = data[0]['cancelled']
+
+    #areas
+    tnmInfo_areas = data[0]['areas']
+
+    tnmInfo_timeYear   = tnmInfo_time[0:4]
+    tnmInfo_timeMonth  = tnmInfo_time[5:7]
+    tnmInfo_timeDay    = tnmInfo_time[8:10]
+    tnmInfo_timeHour   = tnmInfo_time[11:13]
+    tnmInfo_timeMinute = tnmInfo_time[14:16]
+    tnmInfo_timeSecond = tnmInfo_time[17:19]
+
+    if data[0]['cancelled'] == False:
+
+        #content
+        title =  "【#津波情報】"
+        text = f"発表日時: {tnmInfo_timeDay}日{tnmInfo_timeHour}時{tnmInfo_timeMinute}分\n\n"+\
+                "海岸から離れてください\n"
+
+        #list
+        lastGrade = ""
+
+        for area in tnmInfo_areas:
+
+            name  = area['name']
+            grade = area['grade']
+
+            if grade != lastGrade:
+                if grade == "MajorWarning":
+                    text += "\n[#大津波警報]\n"
+                elif grade == "Warning":
+                    text += "\n[#津波警報]\n"
+                elif grade == "Watch":
+                    text += "\n[#津波注意報]\n"
+                else:
+                    text += "\n[不明]\n"
+                lastGrade = grade
+
+            text += f"{name}\n"
+
+    elif data[0]['cancelled'] == True:
+        title = "【津波情報】"
+        text = "津波警報等はすべて解除されました。"
+
+    #return
+    return 0x0102, title, text
+
+
 def put_waiting():
   print('>Waiting for EEW and earthquake information.\n')
 
@@ -323,6 +418,17 @@ def upload(type, title, text):
       ]
     }
 
+  if type == 3:
+    url = ''
+    params = {
+      'embeds': [
+        {
+          'title': title,
+          'description': text
+        }
+      ]
+    }
+
   headers = {'Content-Type': 'application/json'}
 
   res = requests.post(url, json.dumps(params), headers=headers)
@@ -337,9 +443,11 @@ def upload(type, title, text):
 
 eew_repNum_last = -1
 eqinfo_id_last  = -1
+tsunamiInfo_id_last = -1
 
 cnt_getEew    = 0
 cnt_getEqinfo = 0
+cnt_getTsunamiInfo = 0
 
 put_waiting()
 
@@ -366,15 +474,29 @@ while True:
     cnt_getEqinfo = 0
     eqinfo_code, eqinfo_title, eqinfo_text = get_eqinfo()
 
-    if eqinfo_id_last != eqinfo_id:
+    if eqinfo_id_last != eqinfo_id and eqinfo_code == 0x0102:
       if eqinfo_id_last != -1:
         gotNewdata()
         upload(2, eqinfo_title, eqinfo_text)
         put_waiting()
       eqinfo_id_last = eqinfo_id
 
+  #tsunamiInfo
+  if cnt_getTsunamiInfo >= 60:
+
+    cnt_getTsunamiInfo = 0
+    tsunamiInfo_code, tsunamiInfo_title, tsunamiInfo_content = get_tsunamiInfo()
+
+    if tsunamiInfo_id_last != tnmInfo_id and tsunamiInfo_code == 0x0102:
+      if tsunamiInfo_id_last != -1:
+        gotNewdata()
+        upload(3, tsunamiInfo_title, tsunamiInfo_content)
+        put_waiting()
+      tsunamiInfo_id_last = tnmInfo_id
+
   #Update
   cnt_getEew += 1
-  cnt_getEqinfo  += 1
+  cnt_getEqinfo += 1
+  cnt_getTsunamiInfo += 1
 
   sleep(1)
