@@ -7,7 +7,6 @@
 
 import datetime
 import json
-from operator import eq
 import os
 from time import sleep
 
@@ -287,7 +286,7 @@ def get_eqinfo():
          f'地震の規模は{eqinfo_magnitude}、震源の深さは{eqinfo_depth}と推定されます。\n'+\
          f'{eqinfo_tsunami}'
 
-  return 0x0101, title ,text
+  return 0x0102, title ,text
 
 
 def get_tsunamiInfo():
