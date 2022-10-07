@@ -54,7 +54,7 @@ async def get_eqinfo():
 
     try:
         #time
-        eq_time = data[0]['issue']['time']
+        eq_time = data[0]['earthquake']['time']
 
         eq_timeYear   = eq_time[0:4]
         eq_timeMonth  = eq_time[5:7]
