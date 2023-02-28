@@ -1,12 +1,12 @@
 #
-# data\config.py | YDITS for Discord
+# data/config.py | YDITS for Discord
 #
-# (c) 2022 よね/Yone
+# (c) 2022-2023 よね/Yone
 # licensed under the Apache License 2.0
 #
 
 #バージョン
-version = "0.2.3"
+version = "0.3.0"
 
 # Discord Botのトークン
 TOKEN = ""

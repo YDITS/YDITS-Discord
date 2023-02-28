@@ -1,28 +1,25 @@
 #
 # webhooks.py | YDITS for Discord
 #
-# (c) 2022 よね/Yone
+# (c) 2022-2023 よね/Yone
 # licensed under the Apache License 2.0
 #
-
 import datetime
 import json
 import os
 from time import sleep
-
 import requests
-
-#Config
 from data import config
 
 
 # ---------- Main ---------- #
 os.system('cls')
 print(
-    f"webhooks | YDITS for Discord  {config.version}\n"+\
+    f"webhooks | YDITS for Discord  Ver {config.version}\n"+\
     f"(c) 2022 よね/Yone\n\n"+\
     f"--------------------\n"
 )
+
 
 # ---------- Functions ---------- #
 def get_time():
@@ -328,24 +325,28 @@ def get_tsunamiInfo():
 
     # ----- data ----- #
 
-    #time
-    tnmInfo_time = data[0]['time']
+    try:
+        #time
+        tnmInfo_time = data[0]['time']
 
-    #id
-    tnmInfo_id = data[0]['id']
+        #id
+        tnmInfo_id = data[0]['id']
 
-    #cancelled
-    tnmInfo_cancelled = data[0]['cancelled']
+        #cancelled
+        tnmInfo_cancelled = data[0]['cancelled']
 
-    #areas
-    tnmInfo_areas = data[0]['areas']
+        #areas
+        tnmInfo_areas = data[0]['areas']
 
-    tnmInfo_timeYear   = tnmInfo_time[0:4]
-    tnmInfo_timeMonth  = tnmInfo_time[5:7]
-    tnmInfo_timeDay    = tnmInfo_time[8:10]
-    tnmInfo_timeHour   = tnmInfo_time[11:13]
-    tnmInfo_timeMinute = tnmInfo_time[14:16]
-    tnmInfo_timeSecond = tnmInfo_time[17:19]
+        tnmInfo_timeYear   = tnmInfo_time[0:4]
+        tnmInfo_timeMonth  = tnmInfo_time[5:7]
+        tnmInfo_timeDay    = tnmInfo_time[8:10]
+        tnmInfo_timeHour   = tnmInfo_time[11:13]
+        tnmInfo_timeMinute = tnmInfo_time[14:16]
+        tnmInfo_timeSecond = tnmInfo_time[17:19]
+    
+    except Exception as e:
+        return 0x0203, None, None
 
     if data[0]['cancelled'] == False:
 
@@ -496,6 +497,6 @@ while True:
   #Update
   cnt_getEew += 1
   cnt_getEqinfo += 1
-  cnt_getTsunamiInfo += 1
+#   cnt_getTsunamiInfo += 1
 
   sleep(1)

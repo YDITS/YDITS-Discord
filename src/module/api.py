@@ -1,17 +1,15 @@
 #
-# module\api.py | YDITS for Discord
+# module/api.py | YDITS for Discord
 #
-# (c) 2022 よね/Yone
+# (c) 2022-2023 よね/Yone
 # licensed under the Apache License 2.0
 #
-
 import json
 import requests
 
 
 # ---------- Functions ---------- #
 async def get_eqinfo():
-
     url = 'https://api.p2pquake.net/v2/history/'
 
     params = {
@@ -20,37 +18,22 @@ async def get_eqinfo():
       'limit': '1'
     }
 
-    #取得
     try:
         res = requests.get(url, params=params, timeout=3.0)
-
-    #取得失敗時
     except Exception as e:
         return 0x0301, e
 
-
-    # --- ステータス処理 --- #
-
-    #200
     if res.status_code == 200:
-        #デシリアライズ
         try:
             data = json.loads(res.text)
-        
-        #デシリアライズ失敗時
         except Exception:
             return 0x0302, None
 
-    #429
     elif res.status_code == 429:
         return 0x0303, None
 
-    #Other
     else:
         return 0x0304, res.status_code
-
-
-    # --- アクセス --- #
 
     try:
         #time
@@ -157,24 +140,19 @@ async def get_eqinfo():
         else:
             color = 0x7f7fc0
 
-
-    #JSONアクセス失敗時
     except Exception as e:
         return 0x0305, e
 
-    #生成
     data=f'発生日時：{eq_timeDay}日{eq_timeHour}時{eq_timeMinute}分頃\n'+\
          f'　震源　：{eq_hypo}\n'+\
          f'最大震度：{eq_maxScale}\n'+\
          f'　規模　：{eq_magnitude}\n'+\
          f'　深さ　：{eq_depth}\n'+\
          f'{eq_tsunami}'
-
     return 0x0101, [eq_type, color, data]
 
 
 async def get_tnmInfo():
-
     url = 'https://api.p2pquake.net/v2/history/'
 
     params = {
@@ -183,36 +161,22 @@ async def get_tnmInfo():
       'limit': '1'
     }
 
-    #取得
     try:
         res = requests.get(url, params=params, timeout=3.0)
-
-    #取得失敗時
     except Exception as e:
         return 0x0301, e
 
-
-    # --- ステータス処理 --- #
-
-    #200
     if res.status_code == 200:
-        #デシリアライズ
         try:
             data = json.loads(res.text)
-        
-        #デシリアライズ失敗時
         except Exception:
             return 0x0302, None
 
-    #429
     elif res.status_code == 429:
         return 0x0303, None
 
-    #Other
     else:
         return 0x0304, res.status_code
-
-    # --- アクセス --- #
 
     try:
         #time
@@ -236,13 +200,10 @@ async def get_tnmInfo():
 
         color = 0x7f7fc0
 
-    #JSONアクセス失敗時
     except Exception as e:
         return 0x0305, e
 
-    #生成
     if data[0]['cancelled'] == False:
-
         #content
         title =  "津波情報"
         data = f"発表日時: {tnmInfo_timeDay}日{tnmInfo_timeHour}時{tnmInfo_timeMinute}分\n\n"+\
