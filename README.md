@@ -2,10 +2,10 @@
 # YDITS for Discord
 
 ## About
-Open source version of YDITS for Discord. 
+Open source version of YDITS for Discord.
 
 ## Usage Technology
 
 #### Langage
-- Python
-- discord.py
+- Python 3
+- discord.py v2.11
