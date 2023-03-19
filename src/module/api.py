@@ -218,16 +218,51 @@ async def getEqinfo():
     else:
         color = 0x7f7fc0
 
+    if eqinfo_type == "各地の震度情報":
+        pointsText = "\n\n[各地の震度情報]"
+        points = [""] * 10
+        scales = {
+            -1: 9, 10: 8, 20: 7, 30: 6, 40: 5,
+            45: 4, 50: 3, 55: 2, 60: 1, 70: 0
+        }
+        scalesText = {
+            -1: '調査中', 10: '1', 20: '2', 30: '3', 40: '4',
+            45: '5弱', 50: '5強', 55: '6弱', 60: '6強', 70: '7'
+        }
+        pointNameList = [[] for i in range(10)]
+
+        for point in data[0]['points']:
+            if point['scale'] in scales:
+                scale = scales[point['scale']]
+                pointName = point['pref']
+
+                if points[scale] == "":
+                    points[scale] = points[scale] + f"\n\n■震度{scalesText[point['scale']]}"
+
+                if not(pointName in pointNameList[scale]):
+                    pointNameList[scale].append(pointName)
+                    points[scale] = points[scale] + f"\n\n- {pointName}"
+
+                points[scale] = f"{points[scale]}\n{point['addr']}"
+
+            else:
+                continue
+
+        for point in points:
+            pointsText = pointsText + point
+
     return {
         'status': 0x0101,
         'data': {
             'id': eqinfo_id,
+            'maxScale': eqinfo_maxScale,
             'title': "【地震情報】",
             'content': f"{eqinfo_timeDay}日{eqinfo_timeHour}時{eqinfo_timeMinute}分頃\n"+\
                        f"{eqinfo_hypo}を震源とする地震がありました。\n"+\
                        f"最大震度は{eqinfo_maxScale_put}、地震の規模は{eqinfo_magnitude}、\n"+\
                        f"震源の深さは{eqinfo_depth}と推定されます。\n"+\
-                       f"{eqinfo_tsunami}",
+                       f"{eqinfo_tsunami}"+\
+                       f"{pointsText}",
             'color': color
         }
     }

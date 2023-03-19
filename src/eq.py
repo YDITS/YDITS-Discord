@@ -75,6 +75,9 @@ async def eq():
             eqinfo_id_last = eqinfo_id
 
             for channel in config.eqinfo_channels:
+                if channel == 867692303664807946 and eqinfoData['data']['maxScale'] < 40:
+                    continue
+
                 ch = bot.get_channel(channel)
                 embed = discord.Embed(
                     title=eqinfoData['data']['title'],
