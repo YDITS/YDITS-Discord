@@ -7,6 +7,8 @@
 import json
 import requests
 import datetime
+import urllib.request
+from PIL import Image
 
 
 # ---------- Functions ---------- #
@@ -85,20 +87,38 @@ async def getEew():
     
     except Exception:
         return {'status': 0x0305}
+    
+    if eew_alertflg == "警報":
+        eew_color = 0xf04040
+    elif eew_alertflg == "予報":
+        eew_color = 0xf0c040
+    else:
+        eew_color = 0x40f040
 
-    return {
-        'status': 0x0101,
-        'data': {
-            'repNum': eew_repNum,
-            'title': f"≪緊急地震速報 ({eew_alertflg})  {eew_repNum_put}≫",
-            'content': f'{eew_timeDay}日{eew_timeHour}時{eew_timeMinute}分頃\n' +\
-                        f"{eew_hypoName}を震源とする地震が発生しました。\n"+\
-                        f"最大震度は{eew_maxInt}程度、地震の規模は{eew_magunitude}程度、\n"+\
-                        f"震源の深さは{eew_depth}と推定されています。\n"+\
-                         "今後の情報に注意してください",
-            'color': 0xff4040
+    if eew_repNum != "":
+        return {
+            'status': 0x0101,
+            'data': {
+                'repNum': eew_repNum,
+                'title': f"≪緊急地震速報 ({eew_alertflg})  {eew_repNum_put}≫",
+                'content': f'{eew_timeDay}日{eew_timeHour}時{eew_timeMinute}分頃\n' +\
+                            f"{eew_hypoName}を震源とする地震が発生しました。\n"+\
+                            f"最大震度は{eew_maxInt}程度、地震の規模は{eew_magunitude}程度、\n"+\
+                            f"震源の深さは{eew_depth}と推定されています。\n"+\
+                            "今後の情報に注意してください",
+                'color': eew_color
+            }
         }
-    }
+    else:
+        return {
+            'status': 0x0101,
+            'data': {
+                'repNum': eew_repNum,
+                'title': "",
+                'content': "緊急地震速報は発表されていません",
+                'color': eew_color
+            }
+        }
 
 
 async def getEqinfo():
@@ -345,6 +365,71 @@ async def get_tnmInfo():
             'title': title,
             'content': data,
             'color': 0x40ff40
+        }
+    }
+
+
+def get_kmoni_img():
+    niedDate = make_niedDate()
+
+    urllib.request.urlretrieve(f"http://www.kmoni.bosai.go.jp/data/map_img/RealTimeImg/jma_s/{niedDate[:8]}/{niedDate}.jma_s.gif", "kmoni_points_temp_img.gif")
+    kmoni_points = Image.open("kmoni_points_temp_img.gif")
+    urllib.request.urlretrieve("http://www.kmoni.bosai.go.jp/data/map_img/CommonImg/base_map_w.gif", "kmoni_back_temp_img.gif")
+    kmoni_back = Image.open("kmoni_back_temp_img.gif")
+    urllib.request.urlretrieve(f"http://www.kmoni.bosai.go.jp/data/map_img/PSWaveImg/eew/{niedDate[:8]}/{niedDate}.eew.gif", "kmoni_pswave_temp_img.gif")
+    kmoni_pswave = Image.open("kmoni_pswave_temp_img.gif")
+
+    kmoni_back = kmoni_back.convert("RGBA")
+    kmoni_points = kmoni_points.convert("RGBA")
+    kmoni_pswave = kmoni_pswave.convert("RGBA")
+
+    kmoni_points = kmoni_points.resize(kmoni_back.size)
+    kmoni_pswave = kmoni_pswave.resize(kmoni_back.size)
+
+    kmoni_data_img = Image.alpha_composite(kmoni_points, kmoni_pswave)
+    kmoni_img = Image.alpha_composite(kmoni_back, kmoni_data_img)
+
+    kmoni_img.save('kmoni_temp_img.gif')
+
+    return
+
+
+def get_eqlv():
+    url = f'https://kwatch-24h.net/EQLevel.json'
+
+    try:
+        res = requests.get(url, timeout=3.0)
+    except Exception:
+        print(f"Error. Cannot get EQLevel.")
+        return {'status': 0x0301}
+
+    if res.status_code == requests.codes.ok:
+        try:
+            data = json.loads(res.text)
+        except Exception:
+            return {'status': 0x0302}
+    elif res.status_code == 502:
+        return {'status': 0x0306}
+    else:
+        print(f'Error. Cannot get nied.\nHTTP {res.status_code}\n')
+        return {'status': 0x0304}
+
+    try:
+        eqlv_l = data['l']
+        eqlv_g = data['g']
+        eqlv_y = data['y']
+        eqlv_r = data['r']
+    except Exception:
+        return {'status': 0x0305}
+
+    return {
+        'status': 0x0101,
+        'data': {
+            'content':  "■強震観測点情報\n"+\
+                       f"⚪振動Lv: {eqlv_l}\n"+\
+                       f"🔴赤点数: {eqlv_r}\n"+\
+                       f"🟡黄点数: {eqlv_y}\n"+\
+                       f"🟢緑点数: {eqlv_g}\n"
         }
     }
 

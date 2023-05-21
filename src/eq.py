@@ -59,14 +59,21 @@ async def eq():
         if eew_repNum != eew_repNum_last and eew_repNum != "":
             eew_repNum_last = eew_repNum
 
+            eqlvData = api.get_eqlv()
+            api.get_kmoni_img()
+            img = discord.File("kmoni_temp_img.gif", filename="image.gif")
+
+            embed=discord.Embed(
+                title=eewData['data']['title'],
+                description=eewData['data']['content'] + "\n\n" + eqlvData['data']['content'],
+                color=eewData['data']['color'],
+            ).set_footer(
+                text=f"情報提供: 防災科学技術研究所, kwatch-24h.net"
+            ).set_image(url="attachment://image.gif")
+
             for channel in config.eew_channels:
                 ch = bot.get_channel(channel)
-                embed = discord.Embed(
-                    title=eewData['data']['title'],
-                    description=eewData['data']['content'],
-                    color=eewData['data']['color']
-                )
-                await ch.send(embed=embed)
+                await ch.send(embed=embed, file=img)
 
     if eqinfoData['status'] == 0x0101:
         eqinfo_id = eqinfoData['data']['id']
@@ -74,16 +81,14 @@ async def eq():
         if eqinfo_id != eqinfo_id_last and eqinfo_id_last != "":
             eqinfo_id_last = eqinfo_id
 
-            for channel in config.eqinfo_channels:
-                if channel == 867692303664807946 and eqinfoData['data']['maxScale'] < 40:
-                    continue
+            embed = discord.Embed(
+                title=eqinfoData['data']['title'],
+                description=eqinfoData['data']['content'],
+                color=eqinfoData['data']['color']
+            )
 
+            for channel in config.eqinfo_channels:
                 ch = bot.get_channel(channel)
-                embed = discord.Embed(
-                    title=eqinfoData['data']['title'],
-                    description=eqinfoData['data']['content'],
-                    color=eqinfoData['data']['color']
-                )
                 await ch.send(embed=embed)
 
     return

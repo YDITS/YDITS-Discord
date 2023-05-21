@@ -147,5 +147,47 @@ async def tnmInfo(inter: discord.Interaction):
         return
 
 
+# ----- eew ----- #
+@cmdTree.command(
+    name='eew',
+    description='緊急地震速報および強震モニタ画像を表示'
+)
+async def kmoniImg(inter: discord.Interaction):
+    await inter.response.send_message("取得中…", delete_after=3.0)
+
+    eewData = await api.getEew()
+    eqlvData = api.get_eqlv()
+    api.get_kmoni_img()
+    img = discord.File("kmoni_temp_img.gif", filename="image.gif")
+
+    if eewData['status'] == 0x0101:
+        await inter.channel.send(
+            embed=discord.Embed(
+                title=eewData['data']['title'],
+                description=eewData['data']['content'] + "\n\n" + eqlvData['data']['content'],
+                color=eewData['data']['color'],
+            )
+            .set_footer(
+                text=f"情報提供: 防災科学技術研究所, kwatch-24h.net"
+            )
+            .set_image(url="attachment://image.gif"),
+            file=img
+        )
+
+    else:
+        await inter.channel.send(
+            embed=discord.Embed(
+                title="エラーが発生しました",
+                color=0xff4040,
+                description=f"{errors[eewData['status']]}"
+            )
+            .set_footer(
+                text=f"エラーコード: {hex(eewData['status'])}"
+            )
+        )
+
+    return
+
+
 # ---------- RUN ---------- #
 bot.run(config.TOKEN)  # Login
