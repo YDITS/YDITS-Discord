@@ -2,7 +2,7 @@
 
 errors.py | YDITS for Discord
 
-(c) 2022-2023 よね/Yone
+Copyright (c) 2022-2023 よね/Yone
 Licensed under the Apache License 2.0
 
 
@@ -16,3 +16,6 @@ class Errors:
         0x0304: "HTTP NG が発生しました。",
         0x0305: "JSONのデータアクセスで問題が発生しました。",
     }
+
+    def __init__(self) -> None:
+        return

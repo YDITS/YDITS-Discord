@@ -6,7 +6,7 @@
 #
 
 __title__ = "YDITS for Discord"
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 __author__ = "よね/Yone"
 __copyright__ = "Copyright (c) 2022-2023 YDITS, よね/Yone"
 __license__ = "Apache License 2.0"

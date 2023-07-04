@@ -37,12 +37,10 @@ class Eq:
                 embed = (
                     discord.Embed(
                         title=eewData["data"]["title"],
-                        description=eewData["data"]["content"]
-                        + "\n\n"
-                        + eqlvData["data"]["content"],
+                        description=eewData["data"]["content"],
                         color=eewData["data"]["color"],
                     )
-                    .set_footer(text=f"情報提供: 防災科学技術研究所, kwatch-24h.net")
+                    .set_footer(text=f"情報提供: 防災科学技術研究所")
                     .set_image(url="attachment://image.gif")
                 )
 

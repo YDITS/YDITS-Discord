@@ -9,7 +9,7 @@ Open source version of YDITS for Discord.
 
 #### Langages / Libraries
 - Python 3
-- discord.py v2.2.2
+- discord.py v2.3.0
 
 ## LICENSE
 Apache License 2.0
