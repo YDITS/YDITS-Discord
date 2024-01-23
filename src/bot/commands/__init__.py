@@ -1,9 +1,10 @@
 """
 
-__init__.py | bot/commands | YDITS for Discord
+YDITS for Discord
 
-Copyright (c) 2022-2023 よね/Yone
-Licensed under the Apache License 2.0
+Copyright (c) よね/Yone
+
+Licensed under the Apache License 2.0.
 
 """
 

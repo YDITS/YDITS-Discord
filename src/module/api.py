@@ -1,9 +1,12 @@
-#
-# api.py | module | YDITS for Discord
-#
-# (c) 2022-2023 よね/Yone
-# licensed under the Apache License 2.0
-#
+"""
+
+YDITS for Discord
+
+Copyright (c) よね/Yone
+
+Licensed under the Apache License 2.0.
+
+"""
 
 import datetime
 import json
