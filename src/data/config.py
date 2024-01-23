@@ -11,7 +11,7 @@ Licensed under the Apache License 2.0.
 __title__ = "YDITS for Discord"
 __version__ = "0.8.0"
 __author__ = "よね/Yone"
-__copyright__ = "Copyright (c) 2022-2023 YDITS, よね/Yone"
+__copyright__ = "Copyright (c) よね/Yone"
 __license__ = "Apache License 2.0"
 
 TOKEN = ""
