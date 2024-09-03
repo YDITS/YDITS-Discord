@@ -24,7 +24,9 @@ class YditsDiscordCommands(commands.Cog):
         await info.info(self=self, inter=inter)
         return
 
-    @app_commands.command(name="eew", description="緊急地震速報および強震モニタ画像を表示")
+    @app_commands.command(
+        name="eew", description="緊急地震速報および強震モニタ画像を表示"
+    )
     async def kmoniImg(self, inter: discord.Interaction):
         await eew.eew(self=self, inter=inter)
         return

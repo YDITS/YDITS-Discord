@@ -38,7 +38,7 @@ async def tsunami_info(*, self, inter: discord.Interaction):
             )
 
             return
-        
+
     except Exception as error:
         await inter.channel.send(
             embed=discord.Embed(

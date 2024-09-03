@@ -18,7 +18,7 @@ async def info(*, self, inter: discord.Integration):
         name=f"Ver {config.__version__}",
         value=(
             f"{config.__copyright__}\n"
-             "不具合等の連絡は <@892376684093898772> までお願いいたします。"
+            "不具合等の連絡は <@892376684093898772> までお願いいたします。"
         ),
     )
     await inter.response.send_message(embed=embed)
