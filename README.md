@@ -1,25 +1,21 @@
-
 # YDITS for Discord
+
+[→ 日本語](./README_JP.md)
 
 ## Overview
 
-Open source version of YDITS for Discord.
+Discord bot providing disaster prevention information.
 
 ## Usage
 
-#### Development
-
-- Python 3
-- discord.py v2.3.0
-
-#### Run
+1. Run
 
 ```
-python -m YDITS-Discord
+python -m src
 ```
 
 ## LICENSE
 
-Licensed under the [Apache License 2.0](https://github.com/yone1130/YoneDiscordBotServerAdministrator/blob/main/LICENSE).
+Licensed under the [Apache License 2.0](./LICENSE).
 
-Copyright (c) よね/Yone
+Copyright (C) よね/Yone
