@@ -8,9 +8,15 @@
 
 ## 利用方法
 
-1. 実行
+1. インストール
 
+```bash
+pip install -r requirements.txt
 ```
+
+2. 実行
+
+```bash
 python -m src
 ```
 
