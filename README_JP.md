@@ -24,4 +24,4 @@ python -m src
 
 [Apache License 2.0](./LICENSE) のもとでライセンスされます。
 
-Copyright (C) よね/Yone
+Copyright &copy; よね/Yone
