@@ -2,17 +2,17 @@
 
 YDITS for Discord
 
-Copyright (C) よね/Yone
-
+Copyright (C) 2022-2026 よね/Yone
 Licensed under the Apache License 2.0.
+
+https://github.com/YDITS/YDITS-Discord
 
 """
 
 import discord
 
-import errors
-from module import api
-
+from ydits_discord import errors
+from ydits_discord.module import api
 
 async def eqinfo(*, self, inter: discord.Interaction):
     await inter.response.send_message("取得中", delete_after=3.0)

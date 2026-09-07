@@ -1,1 +1,4 @@
+requests==2.34.2
 discord.py==2.3.0
+audioop-lts==0.2.2
+pillow==12.3.0

@@ -1,0 +1,22 @@
+[project]
+name = "ydits-discord"
+version = "0.8.0"
+description = "防災情報を提供する Discord Bot"
+readme = "README.md"
+authors = [
+    { name = "よね/Yone", email = "pypi@yoneyo.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "audioop-lts>=0.2.2",
+    "discord-py==2.3.0",
+    "pillow>=12.3.0",
+    "requests-oauthlib>=2.0.0",
+]
+
+[project.scripts]
+ydits-discord = "ydits_discord.__main__:main"
+
+[build-system]
+requires = ["uv_build>=0.12.9,<0.13.0"]
+build-backend = "uv_build"

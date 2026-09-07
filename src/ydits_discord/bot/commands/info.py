@@ -2,15 +2,15 @@
 
 YDITS for Discord
 
-Copyright (C) よね/Yone
-
+Copyright (C) 2022-2026 よね/Yone
 Licensed under the Apache License 2.0.
+
+https://github.com/YDITS/YDITS-Discord
 
 """
 
 import discord
-from data import config
-
+from ydits_discord import config
 
 async def info(*, self, inter: discord.Integration):
     embed = discord.Embed(title="YDITS", color=0x40FF40, description="")

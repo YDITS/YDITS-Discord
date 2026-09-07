@@ -2,17 +2,17 @@
 
 YDITS for Discord
 
-Copyright (C) よね/Yone
-
+Copyright (C) 2022-2026 よね/Yone
 Licensed under the Apache License 2.0.
+
+https://github.com/YDITS/YDITS-Discord
 
 """
 
 from discord.ext import commands
-from bot.commands import *
-from bot.events import *
-from bot.tasks import *
-
+from ydits_discord.bot import events
+from ydits_discord.bot.commands import YditsDiscordCommands
+from ydits_discord.bot.tasks import YditsDiscordTasks
 
 class YditsDiscordClient(commands.Bot):
     async def on_ready(self):
@@ -20,4 +20,4 @@ class YditsDiscordClient(commands.Bot):
         await self.add_cog(cog)
         cog = YditsDiscordTasks(bot=self)
         await self.add_cog(cog)
-        await on_ready.on_ready(self)
+        await events.on_ready(self)

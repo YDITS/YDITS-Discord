@@ -2,19 +2,20 @@
 
 YDITS for Discord
 
-Copyright (C) よね/Yone
-
+Copyright (C) 2022-2026 よね/Yone
 Licensed under the Apache License 2.0.
+
+https://github.com/YDITS/YDITS-Discord
 
 """
 
 import discord
-from data import config
-from module import api
-
+from discord.ext import commands
+from ydits_discord import config
+from ydits_discord.module import api
 
 class Eq:
-    def __init__(self, *, client: discord.ext.commands.Bot) -> None:
+    def __init__(self, *, client: commands.Bot) -> None:
         self.client = client
         self.eew_repNum = None
         self.eew_repNum_last = None

@@ -2,15 +2,15 @@
 
 YDITS for Discord
 
-Copyright (C) よね/Yone
-
+Copyright (C) 2022-2026 よね/Yone
 Licensed under the Apache License 2.0.
+
+https://github.com/YDITS/YDITS-Discord
 
 """
 
 from __main__ import *
-from bot.tasks import *
-
+# from ydits_discord.bot.tasks import *
 
 async def on_ready(self):
     print("[INFO] Logged in.")

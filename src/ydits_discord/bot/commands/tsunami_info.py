@@ -2,16 +2,16 @@
 
 YDITS for Discord
 
-Copyright (C) よね/Yone
-
+Copyright (C) 2022-2026 よね/Yone
 Licensed under the Apache License 2.0.
+
+https://github.com/YDITS/YDITS-Discord
 
 """
 
 import discord
-import errors
-from module import api
-
+from ydits_discord import errors
+from ydits_discord.module import api
 
 async def tsunami_info(*, self, inter: discord.Interaction):
     try:
