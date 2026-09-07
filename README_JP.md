@@ -1,6 +1,6 @@
 # YDITS for Discord
 
-[→ English](./README.md)
+[Read in English >](./README.md)
 
 ## 概要
 
@@ -8,20 +8,20 @@
 
 ## 利用方法
 
-1. インストール
+### パッケージをインストール
 
 ```bash
 pip install -r requirements.txt
 ```
 
-2. 実行
+### 実行
 
 ```bash
-python -m src
+python -m ydits_discord
 ```
 
 ## ライセンス
 
 [Apache License 2.0](./LICENSE) のもとでライセンスされます。
 
-Copyright &copy; よね/Yone
+Copyright © 2022-2026 よね/Yone
