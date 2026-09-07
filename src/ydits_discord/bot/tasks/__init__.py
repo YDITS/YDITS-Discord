@@ -14,6 +14,7 @@ from discord.ext import commands, tasks
 
 from ydits_discord.bot.tasks.eq import Eq
 
+
 class YditsDiscordTasks(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot

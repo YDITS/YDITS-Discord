@@ -12,6 +12,7 @@ https://github.com/YDITS/YDITS-Discord
 import discord
 from ydits_discord import config
 
+
 async def info(*, self, inter: discord.Integration):
     embed = discord.Embed(title="YDITS", color=0x40FF40, description="")
     embed.add_field(

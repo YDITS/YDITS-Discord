@@ -9,8 +9,6 @@ https://github.com/YDITS/YDITS-Discord
 
 """
 
-from __main__ import *
-# from ydits_discord.bot.tasks import *
 
 async def on_ready(self):
     print("[INFO] Logged in.")

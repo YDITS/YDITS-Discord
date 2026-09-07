@@ -9,6 +9,7 @@ https://github.com/YDITS/YDITS-Discord
 
 """
 
+
 class Errors:
     ERRORS = {
         0x0301: "情報の取得がタイムアウトしました。\n",

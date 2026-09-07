@@ -14,6 +14,7 @@ from discord.ext import commands
 from ydits_discord import config
 from ydits_discord.module import api
 
+
 class Eq:
     def __init__(self, *, client: commands.Bot) -> None:
         self.client = client

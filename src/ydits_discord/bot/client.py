@@ -14,6 +14,7 @@ from ydits_discord.bot import events
 from ydits_discord.bot.commands import YditsDiscordCommands
 from ydits_discord.bot.tasks import YditsDiscordTasks
 
+
 class YditsDiscordClient(commands.Bot):
     async def on_ready(self):
         cog = YditsDiscordCommands(client=self)

@@ -14,6 +14,7 @@ import discord
 from ydits_discord import errors
 from ydits_discord.module import api
 
+
 async def eqinfo(*, self, inter: discord.Interaction):
     await inter.response.send_message("取得中", delete_after=3.0)
     eqinfoData = await api.getEqinfo()

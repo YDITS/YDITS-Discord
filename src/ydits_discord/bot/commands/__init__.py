@@ -25,6 +25,7 @@ __all__ = [
     "tsunami_info",
 ]
 
+
 class YditsDiscordCommands(commands.Cog):
     def __init__(self, client: discord.Client) -> None:
         client = client
